@@ -13,8 +13,15 @@ module adder_tb();
 	
 	reg		[N-1:0]		termA;
 	reg		[N-1:0]		termB;
-	reg		[N-1:0]		sum;
-	reg					carry;
+	wire	[N-1:0]		sum;
+	wire				carry;
+
+	adder DUT(
+		.termA(termA),
+		.termB(termB),
+		.sum(sum),
+		.carry(carry)
+		);
 
 	initial begin
 		termA = 0;
@@ -27,7 +34,7 @@ module adder_tb();
 				termA = a;
 				termB = b;
 				#1;
-				if(a + b == sum)
+				if(a + b == (carry*256 + sum))
 					$display("TermA - ",a," TermB - ",b," Carry - ",carry," Sum - ",sum," True");
 				else
 					$display("TermA - ",a," TermB - ",b," Carry - ",carry," Sum - ",sum," False");	
