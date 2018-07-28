@@ -40,10 +40,12 @@ module adder_tb();
 					$display("TermA - ",a," TermB - ",b," Carry - ",carry," Sum - ",sum," False");	
 			end
 		end
+		$finish;
 	end
 	
 	initial begin
-	
+		$dumpfile("dump.vcd");
+		$dumpvars;
 	end
 	
 endmodule
