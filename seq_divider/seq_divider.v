@@ -11,7 +11,7 @@ module seq_divider(
 	div_ready,
 	divident,
 	divisor,
-	fraction,
+	quiontent,
 	remainder
 	);
 	
@@ -20,55 +20,65 @@ module seq_divider(
 	input					clk;
 	input					rst;
 	input					div_start;
-	input		[14:0]		divident;
+	input		[7:0]		divident;
 	input		[7:0]		divisor;
-	output		[9:0]		fraction;
+	output		[7:0]		quiontent;
 	output		[7:0]		remainder;
-	output reg				div_ready;
-	wire		[9:0]		subs;
-	wire		[9:0]		fraction;
-	wire		[7:0]		remainder;
-	reg			[16:0]		answer;
+	output wire				div_ready;
+	wire		[8:0]		difference;
+	wire					borrov;
+	reg			[15:0]		buffer;
 	reg			[3:0]		counter;
 	
-	assign subs = answer[16:9] - divisor;
-	assign fraction = answer[9:0];
-	assign remainder = answer[15:8];
+	assign {borrov,difference} = buffer[15:7] - divisor;
+	assign div_ready = (counter == 4'b1000);	
+	assign remainder = buffer[15:8];
+	assign quiontent = buffer[7:0];
 	
 	always @ (posedge clk or posedge rst)
 	begin
 		if(rst)
 		begin
-			answer 		<= 0;
-			counter 	<= 0;
-			div_ready 	<= 0;
-		end
-		else
+			buffer 		<= 16'h0000;
+		end	
+		else 
 		begin
-			if(div_start)
+			if(div_start) 
 			begin
-				counter 		<= 0;
-				answer[2*N-1:N]	<= divident;
-				answer[N-1:0]	<= 8'b0;
-				div_ready 		<= 0;
-			end else if(!div_ready)
+				buffer <= {8'h00,divident};
+			end 
+			else 
+			if(!div_ready)
 			begin
-				if(subs[16])
+				if(!borrov)
 				begin
-					answer 			<= (answer << 1);
+					buffer <= {difference[7:0],buffer[6:0],~borrov};
 				end
 				else
 				begin
-					answer 			<= (answer << 1) + 1;
-					answer[16:9]	<= subs[7:0];					
-				end
-				counter = counter + 1;
-				if(counter == 11)
-				begin
-					div_ready <= 1;
+					buffer <= {buffer[14:0],~borrov};				
 				end
 			end
 		end
 	end
 	
+	always @ (posedge clk or posedge rst)
+	begin
+		if(rst)
+		begin
+			counter	<= 4'b0000;
+		end	
+		else 
+		begin
+			if(div_start) 
+			begin
+				counter <= 4'b0000;
+			end 
+			else 
+			if(!div_ready)
+			begin
+				counter <= counter + 1;
+			end
+		end
+	end
 endmodule

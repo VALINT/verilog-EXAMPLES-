@@ -9,12 +9,12 @@ module seq_divider_tb();
 	reg 			clk;
 	reg 			rst;
 	reg				div_start;
-	reg 	[14:0]	divident;
+	reg 	[7:0]	divident;
 	reg		[7:0]	divisor;
 	wire			div_ready;
-	wire	[9:0]	fraction;
+	wire	[7:0]	fraction;
 	wire	[7:0]	remainder;
-	
+	integer			math;
 	seq_divider DUT(
 		.clk(clk),
 		.rst(rst),
@@ -22,28 +22,62 @@ module seq_divider_tb();
 		.div_ready(div_ready),
 		.divident(divident),
 		.divisor(divisor),
-		.fraction(fraction),
+		.quiontent(fraction),
 		.remainder(remainder)
 		);
 		
-	initial begin
-		#1000;
-		divident = 'b101100100000000;
-		divisor  = 'd35;
-		div_start = 1;
-		#11;
-		div_start = 0;
-		#300;
+task trans;
+		input  [7:0] ax;
+		input  [7:0] bx;
+		begin
+			divident = ax;
+			divisor = bx;
+			checker(ax,bx);
+		end
+	endtask
+
+	task checker;
+		input  [7:0] ax;
+		input  [7:0] bx;
+		begin
+			@(posedge clk)
+			#3;
+			div_start = 0;
+			math = ax/bx;
+			@(posedge div_ready)
+			#3
+			if((math == fraction))
+				$display("A - %3d, B - %3d, Q - %3d, M - %3d", ax, bx, fraction, math, "	True");
+			else 
+				$display("A - %3d, B - %3d, Q - %3d, M - %3d", ax, bx, fraction, math, "	False");
+		end
+	endtask
 		
-		divident = 'd120;
-		divisor  = 'd5;
-		div_start = 1;
-		#11;
-		div_start = 0;
-		#300;
-		$finish;
+initial begin : test_module
+		integer	a;
+		integer	b;
+		integer counter;
+		counter = 0;
+	
+	#1;
+	repeat(10000)
+	begin
+		@(posedge clk);
+		begin
+			counter = counter + 1;
+			if(counter > 10)
+			begin
+				counter = 0;
+				a = $urandom_range(0,255);
+				b = $urandom_range(0,255);
+				div_start = 1;
+				trans(a,b);
+			end
+			
+		end
 	end
-		
+		$finish;
+end
 	initial begin
 		clk = 0;
 		rst = 0;
