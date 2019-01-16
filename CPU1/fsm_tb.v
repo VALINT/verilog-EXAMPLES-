@@ -79,7 +79,8 @@ module fsm_tb();
     end
 
     assign carry_f_in = carry_out;
-    assign carry_in = (carry_en)? carry_flag : (substrate) ? (1'h1) : (1'h0);   
+    //assign carry_in = (carry_en)? carry_flag : (substrate) ? (1'h1) : (1'h0);   
+    assign carry_in = (carry_en)? ((substrate)? ~carry_flag : carry_flag) : (substrate) ? (1'h1) : (1'h0);
 
     adder ADD(
         .term_a(op_a),

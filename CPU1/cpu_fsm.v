@@ -63,6 +63,7 @@ parameter  [7:0]   SME = 8'b0001_0001;
 parameter  [7:0]   SUM = 8'b0010_0000;
 parameter  [7:0]   SMC = 8'b0010_0001;
 parameter  [7:0]   SUB = 8'b0010_0010;
+parameter  [7:0]   SBB = 8'b0010_0011;
 parameter  [7:0]   VAD = 8'b0010_0100;
 parameter  [7:0]   VAI = 8'b0010_0101;
 parameter  [7:0]   JMP = 8'b0100_0000;
@@ -149,7 +150,7 @@ begin   :   OUTPUT_LOGIC
                                     operand_a <= data;
                                     en_acc  <= 1'b1;
                                 end
-                                else if(instr_reg == SUM || instr_reg == SMC || instr_reg == SUB || instr_reg == VAD || instr_reg == VAI)
+                                else if(instr_reg == SUM || instr_reg == SMC || instr_reg == SUB || instr_reg == SBB || instr_reg == VAD || instr_reg == VAI)
                                 begin
                                     operand_a <= data;
                                     en_acc  <= 1'b1;
@@ -157,7 +158,7 @@ begin   :   OUTPUT_LOGIC
                                 //state_counter <= state_counter + 1;
                             end
             CONTROL     :   begin
-                                if(instr_reg == SUM || instr_reg == SMC || instr_reg == SUB)
+                                if(instr_reg == SUM || instr_reg == SMC || instr_reg == SUB || instr_reg == SBB)
                                 begin
                                     carry <= carry_f_in;
                                 end
@@ -239,9 +240,9 @@ begin
             o_en        = 1'b1;
             
         end
-        else if(instr_reg == SUM || instr_reg == SMC || instr_reg == SUB || instr_reg == VAD || instr_reg == VAI )
+        else if(instr_reg == SUM || instr_reg == SMC || instr_reg == SUB || instr_reg == SBB || instr_reg == VAD || instr_reg == VAI )
         begin
-            if( instr_reg == SMC)
+            if( instr_reg == SMC || instr_reg == SBB)
                 carry_en = 1'b1;
 
             addr_source = 1'b1;
@@ -280,7 +281,7 @@ begin
         end
         else if(instr_reg == SUM || instr_reg == SMC || instr_reg == VAD || instr_reg == VAI)
         begin
-            if(instr_reg == SMC)
+            if(instr_reg == SMC )
                 carry_en = 1'b1;
 
             if(instr_reg == VAD)
@@ -301,8 +302,10 @@ begin
             re_e        = 1'b0;
             o_en        = 1'b0;
         end
-        else if(instr_reg == SUB)
+        else if(instr_reg == SUB || instr_reg == SBB)
         begin
+            if(instr_reg == SBB)
+                carry_en = 1'b1;
             substrate   = 1'b1;
             addr_source = 1'b1;
             operand_b   = 2'b00;
