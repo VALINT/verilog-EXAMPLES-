@@ -38,7 +38,7 @@ module pwm(
                 duty <= w_duty;
             end
 
-            counter = counter + 1;
+            counter <= counter + 1;
         end
     end
 

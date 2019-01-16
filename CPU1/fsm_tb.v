@@ -16,15 +16,15 @@ module fsm_tb();
     wire    [7:0]   data;
     wire    [15:0]  address;
     reg     [7:0]   data1;
-    wire    [7:0]   data_out;
     wire            clr_acc;
     wire            en_acc;
     wire    [7:0]   operand_a;
-    wire    [2:0]   operand_b;
+    wire    [1:0]   operand_b;
     wire            carry_en;
     wire            carry_f_in;
     wire            carry_flag;
     wire            substrate;
+    wire            zero;
 
 
     cpu_fsm FSM (
@@ -39,10 +39,14 @@ module fsm_tb();
         .en_acc(en_acc),
         .carry_en(carry_en),
         .operand_a(operand_a),
+        .operand_b(operand_b),
         .carry_f_in(carry_f_in),
         .carry_flag(carry_flag),
-        .substrate(substrate)
+        .substrate(substrate),
+        .zero(zero)
     );
+
+    
 
     ram_64K_x_8 MEM(
         .data(data), 
@@ -53,26 +57,37 @@ module fsm_tb();
         .wr_e(wr_e)
     );
 
+    wire    [7:0]   data_out;
     wire            carry_in;
     wire            carry_out;
     wire    [7:0]   sum;
     wire    [7:0]   op_a;
+    reg     [7:0]   op_b;
 
-    //assign  op_b = (operand_b == 2'b00) ? data_out : 8'h00;
-    //              (operand_b == 2'b01) ?  : 8'b1111_1111;
+    assign  op_a =  (substrate)? (~operand_a) : operand_a;
+    //assign  op_b =  (operand_b == 2'b00) ? data_out : (operand_b == 2'b01) ? (8'h00) : (operand_b == 2'b01) ? (8'hff) : 8'hZZ;
+    assign  zero = (!data_out);
+    
+    always @ (*)
+    begin
+        case(operand_b)
+            2'b00   :  op_b = data_out;
+            2'b01   :  op_b = 8'b0000_0000;
+            2'b10   :  op_b = 8'b1111_1111;
+            default :  op_b = 8'bZZZZ_ZZZZ;
+        endcase
+    end
 
-    assign  op_a = (substrate)? (8'hff) : operand_a;
+    assign carry_f_in = carry_out;
+    assign carry_in = (carry_en)? carry_flag : (substrate) ? (1'h1) : (1'h0);   
 
     adder ADD(
         .term_a(op_a),
-        .term_b(data_out),
+        .term_b(op_b),
         .sum(sum),
         .carry_in(carry_in),
         .carry_out(carry_out)
     );
-
-    assign carry_f_in = carry_out;
-    assign carry_in = (carry_en)? carry_flag : (substrate) ? (1'h1) : (1'h0);
 
     accumulator ACC(
         .DataIn(sum),

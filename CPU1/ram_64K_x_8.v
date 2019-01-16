@@ -24,9 +24,9 @@ module ram_64K_x_8(
     inout   [7:0]   data;
 
     reg     [7:0] ram [65535:0];
-    reg     [7:0] data_out;
+    reg     [7:0] ram_data_out;
 
-    assign data = o_en ? data_out : 8'bZ;
+    assign data = o_en ? ram_data_out : 8'bZ;
 
     always @ (posedge clk)
     begin : mem
@@ -38,8 +38,8 @@ module ram_64K_x_8(
     always @ (*)
     begin 
         if(re_e)
-            data_out = ram[address];
-        else data_out = 8'bZ;
+            ram_data_out = ram[address];
+        else ram_data_out = 8'bZ;
     end
 
 endmodule
