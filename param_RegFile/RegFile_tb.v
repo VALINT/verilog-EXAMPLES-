@@ -10,7 +10,7 @@
 
 module RegFile_tb();
 
-    parameter  WordWidth    = 64;
+    parameter  WordWidth    = 32;
     parameter  WordsAmount  = 32;
     parameter  AddrWidth    = $clog2(WordsAmount);
 
@@ -26,7 +26,7 @@ module RegFile_tb();
     wire    [WordWidth-1:0]     RData2;
 
     param_RegFile #(
-        .WordWidth(64),
+        .WordWidth(32),
         .WordsAmount(32),
         .ZeroSellIsZero(1))
     RegFile(
