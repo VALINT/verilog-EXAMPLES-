@@ -70,9 +70,11 @@ initial begin
     rstb = 0;
     #100;
     force MIPS.PCControl = 1'b0;
-    force MIPS.RegDest = 1'b1;
-    force MIPS.MemToReg = 1'b0;
-    force MIPS.ALUSrc = 1'b0;
+    //force MIPS.RegFile.RegFile[10] = 32'd10;
+    //force MIPS.RegFile.RegFile[11] = 32'd20;
+    //force MIPS.RegDest = 1'b1;
+    //force MIPS.MemToReg = 1'b0;
+    //force MIPS.ALUSrc = 1'b0;
     rstb = 1;
     clk =  0;
 

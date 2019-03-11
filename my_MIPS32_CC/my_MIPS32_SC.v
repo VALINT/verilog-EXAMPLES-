@@ -90,12 +90,38 @@ module MIPS32_SC(
         .operALU(OperALU),
         .result(Result),
         .zero(Zero),
-        .carry_in(CarryIn),
+        .carry_in(1'b0),
         .carry_out(CarryOut)
     );
 
     assign DatAddr = Result;
     assign DataOut = Data2;
+
+    wire        [5:0]   opcode;
+    wire        [5:0]   func;
+    wire                Branch;
+    wire        [1:0]   ALUOp;
+
+    assign  opcode  = Instruction[31:26];
+    assign  func    = Instruction[5:0];
+
+    control_unit CU(
+        .opcode(opcode),
+        .RegDst(RegDest),
+        .Branch(Branch),
+        .MemRead(ReEnDat),
+        .MemToReg(MemToReg),
+        .MemWrite(WrEnDat),
+        .ALUSrc(ALUSrc),
+        .RegWrt(WrEn),
+        .ALUOp(ALUOp)
+    );
+
+    ALU_control_unit ALU_CU(
+        .func(func),   
+        .ALUOp(ALUOp),
+        .operALU(OperALU)     
+    );
 
     always @ (posedge clk or negedge rstb)
     begin   :   ProgramCounter
